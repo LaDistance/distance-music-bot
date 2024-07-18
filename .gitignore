@@ -1,0 +1,3 @@
+.env
+# any pycache :
+__pycache__/

@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "distance-music-bot"
+version = "0.1.0"
+description = "A private Discord bot to play music from YouTube in Discord channels"
+authors = ["Antoine LAURENT <alaurent@fieldbox.ai>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+youtube-dl = "^2021.12.17"
+discord-py = {extras = ["voice"], version = "^2.4.0"}
+pytubefix = "^6.2.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
