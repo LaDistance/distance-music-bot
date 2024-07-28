@@ -9,7 +9,7 @@ readme = "README.md"
 python = "^3.10"
 youtube-dl = "^2021.12.17"
 discord-py = {extras = ["voice"], version = "^2.4.0"}
-pytubefix = "^6.2.2"
+pytubefix = "^6.6.3"
 
 
 [build-system]
