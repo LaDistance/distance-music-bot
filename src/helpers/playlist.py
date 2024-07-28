@@ -1,31 +1,40 @@
-import discord
+from typing import List
+from discord import VoiceClient, FFmpegPCMAudio
+from discord.ext.commands import Context
 from pytubefix import YouTube
 import os
 import asyncio
 
 
 class Playlist:
-    def __init__(self, bot):
-        self.bot = bot
-        self.queue = []
-        self.voice_client = None
-        self.current_ctx = None
-        self.max_queue_size = 10
+    def __init__(self):
+        self.guild_id: int = None
+        self.queue: List[str] = []
+        self.voice_client : VoiceClient = None
+        self.current_ctx : Context = None
+        self.max_queue_size = 200
 
-    def add(self, url):
+    def add(self, url: str) -> None:
         if len(self.queue) >= self.max_queue_size:
             raise ValueError("The playlist is full.")
         self.queue.append(url)
 
-    def next(self):
+    def add_playlist(self, videos: List[YouTube]) -> None:
+        if len(self.queue) + len(videos) > self.max_queue_size:
+            raise ValueError("The playlist is full.")
+        
+        for video in videos:
+            self.queue.append(video.watch_url)
+
+    def next(self) -> str | None:
         if len(self.queue) > 0:
             return self.queue.pop(0)
         return None
 
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return len(self.queue) == 0
 
-    async def connect(self, ctx):
+    async def connect(self, ctx: Context) -> bool:
         if ctx.author.voice is None:
             await ctx.send("You are not connected to a voice channel.")
             return False
@@ -39,9 +48,16 @@ class Playlist:
         self.current_ctx = ctx
         return True
 
-    async def play_next(self):
+    async def disconnect(self) -> None:
+        if self.voice_client is not None:
+            await self.voice_client.disconnect()
+            self.voice_client = None
+            await self.current_ctx.send("Disconnected from the voice channel.")
+
+    async def play_next(self) -> None:
         if self.is_empty():
             await self.current_ctx.send("The playlist is empty.")
+            await self.disconnect()
             return
 
         url = self.next()
@@ -49,7 +65,7 @@ class Playlist:
         stream = yt.streams.filter(only_audio=True).first()
         audio_file = stream.download(filename="audio.mp4")
 
-        source = discord.FFmpegPCMAudio(
+        source = FFmpegPCMAudio(
             audio_file,
         )
         self.voice_client.play(source)
@@ -60,19 +76,24 @@ class Playlist:
             await asyncio.sleep(1)
 
         os.remove(audio_file)
-
-    async def handle_next(self):
         await self.play_next()
 
-    async def stop(self):
-        if self.voice_client is not None:
-            await self.voice_client.disconnect()
-            self.voice_client = None
-            await self.current_ctx.send("Disconnected from the voice channel.")
+    async def handle_next(self) -> None:
+        await self.play_next()
 
-    async def skip(self):
+    async def stop(self) -> None:
+        if self.voice_client is not None:
+            await self.disconnect()
+            await self.queue.clear()
+
+    async def skip(self) -> None:
         if self.voice_client is not None:
             self.voice_client.stop()
             await self.play_next()
         else:
             await self.current_ctx.send("Not currently playing anything.")
+
+    async def clear(self) -> None:
+        self.queue.clear()
+        self.voice_client.stop()
+        await self.current_ctx.send("Playlist cleared.")
