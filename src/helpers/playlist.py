@@ -2,6 +2,7 @@ from typing import List
 from discord import VoiceClient, FFmpegPCMAudio
 from discord.ext.commands import Context
 from pytubefix import YouTube
+from pytubefix.exceptions import LoginRequired
 import os
 import asyncio
 
@@ -61,21 +62,24 @@ class Playlist:
             return
 
         url = self.next()
-        yt = YouTube(url)
-        stream = yt.streams.filter(only_audio=True).first()
-        audio_file = stream.download(filename="audio.mp4")
+        yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
+        try:
+            stream = yt.streams.filter(only_audio=True).first()
+            audio_file = stream.download(filename="audio.mp4")
 
-        source = FFmpegPCMAudio(
-            audio_file,
-        )
-        self.voice_client.play(source)
+            source = FFmpegPCMAudio(
+                audio_file,
+            )
+            self.voice_client.play(source)
 
-        await self.current_ctx.send(f"Now playing: {yt.title}")
+            await self.current_ctx.send(f"Now playing: {yt.title}")
 
-        while self.voice_client.is_playing():
-            await asyncio.sleep(1)
+            while self.voice_client.is_playing():
+                await asyncio.sleep(1)
 
-        os.remove(audio_file)
+            os.remove(audio_file)
+        except LoginRequired:
+            await self.current_ctx.send("This video requires a login to play.")
         await self.play_next()
 
     async def handle_next(self) -> None:
