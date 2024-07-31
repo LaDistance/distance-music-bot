@@ -44,7 +44,7 @@ async def play(ctx: Context, url: str):
     
     # If it is part of a playlist, get the whole playlist.
     if is_in_a_playlist(url):
-        yt_playlist = YtPlaylist(url)
+        yt_playlist = YtPlaylist(url, use_oauth=True, allow_oauth_cache=True)
         logger.info(yt_playlist)
         logger.info(yt_playlist.videos)
         playlist.add_playlist(yt_playlist.videos)
