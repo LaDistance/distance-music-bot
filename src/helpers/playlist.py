@@ -7,8 +7,8 @@ import asyncio
 
 
 class Playlist:
-    def __init__(self):
-        self.guild_id: int = None
+    def __init__(self, guild_id: str):
+        self.guild_id: str = None
         self.queue: List[str] = []
         self.voice_client : VoiceClient = None
         self.current_ctx : Context = None
