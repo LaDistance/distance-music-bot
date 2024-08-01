@@ -62,7 +62,8 @@ async def play(ctx: Context, url: str):
         playlist.add_playlist(tracks_urls)
         await ctx.send(f"Added {len(tracks_urls)} to the playlist.")
     else:
-        playlist.add(external_backend.get_track_youtube_url(url))
+        url = await external_backend.get_track_youtube_url(url)
+        playlist.add(url)
         await ctx.send(f"Added to playlist: {url}")
 
     # Get the voice channel of the user
