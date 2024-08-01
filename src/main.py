@@ -2,13 +2,12 @@ from os import environ
 import discord
 from discord.ext import commands
 from discord.ext.commands import Context
-from pytubefix import Playlist as YtPlaylist
 from spotipy import Spotify
 from external_backend.spotify import SpotifyExternalBackend
 from external_backend.youtube import YoutubeExternalBackend
 from helpers.playlist import Playlist
 from helpers.logger import logger
-from helpers.login import login_to_spotify, login_to_youtube
+from helpers.login import login_to_youtube
 
 intents = discord.Intents.default()
 intents.message_content = True  # Ensure message content intent is enabled
@@ -118,7 +117,4 @@ async def clear(ctx: Context):
 
 
 if __name__ == "__main__":
-    # Login to Youtube. You will then be prompted to authenticate with your Google account.
-    login_to_youtube()
-
     bot.run(TOKEN)

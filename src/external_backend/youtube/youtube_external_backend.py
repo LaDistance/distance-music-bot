@@ -3,6 +3,8 @@ from typing import List
 from external_backend.base import ExternalBackend
 from pytubefix import Playlist
 
+from src.helpers.root import get_project_root
+
 
 class YoutubeExternalBackend(ExternalBackend):
     def is_valid_url(url: str) -> bool:
@@ -37,7 +39,7 @@ class YoutubeExternalBackend(ExternalBackend):
         return "list" in url
 
     def get_playlist_youtube_urls(url: str) -> List[str]:
-        yt_playlist = Playlist(url, use_oauth=True, allow_oauth_cache=True)
+        yt_playlist = Playlist(url, use_oauth=True, allow_oauth_cache=True, token_file=f"{get_project_root()}/tmp/youtube_token.json")
         return [video.watch_url for video in yt_playlist.videos]
 
     def get_track_youtube_url(self, url: str) -> str:

@@ -3,3 +3,4 @@
 __pycache__/
 discord.log
 .cache
+tmp/

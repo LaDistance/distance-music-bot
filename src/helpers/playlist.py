@@ -5,7 +5,7 @@ from pytubefix import YouTube
 from pytubefix.exceptions import LoginRequired
 import os
 import asyncio
-
+from helpers.root import get_project_root
 
 class Playlist:
     def __init__(self, guild_id: str):
@@ -62,7 +62,7 @@ class Playlist:
             return
 
         url = self.next()
-        yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
+        yt = YouTube(url, use_oauth=True, allow_oauth_cache=True, token_file=f"{get_project_root()}/tmp/youtube_token.json")
         try:
             stream = yt.streams.filter(only_audio=True).first()
             audio_file = stream.download(filename="audio.mp4")
