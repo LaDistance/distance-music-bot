@@ -5,8 +5,8 @@ from pytubefix import YouTube
 from pytubefix.exceptions import LoginRequired
 import os
 import asyncio
-
-
+from helpers.root import get_project_root
+import random
 class Playlist:
     def __init__(self, guild_id: str):
         self.guild_id: str = None
@@ -20,12 +20,12 @@ class Playlist:
             raise ValueError("The playlist is full.")
         self.queue.append(url)
 
-    def add_playlist(self, videos: List[YouTube]) -> None:
+    def add_playlist(self, videos: List[str]) -> None:
         if len(self.queue) + len(videos) > self.max_queue_size:
             raise ValueError("The playlist is full.")
         
-        for video in videos:
-            self.queue.append(video.watch_url)
+        for url in videos:
+            self.queue.append(url)
 
     def next(self) -> str | None:
         if len(self.queue) > 0:
@@ -65,7 +65,9 @@ class Playlist:
         yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
         try:
             stream = yt.streams.filter(only_audio=True).first()
-            audio_file = stream.download(filename="audio.mp4")
+            # Randomize the filename after the title to avoid conflicts
+            filename = f"{yt.title}-{random.randint(0, 100000)}.mp4"
+            audio_file = stream.download(filename=filename)
 
             source = FFmpegPCMAudio(
                 audio_file,
@@ -88,7 +90,7 @@ class Playlist:
     async def stop(self) -> None:
         if self.voice_client is not None:
             await self.disconnect()
-            await self.queue.clear()
+            self.queue.clear()
 
     async def skip(self) -> None:
         if self.voice_client is not None:

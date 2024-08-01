@@ -2,3 +2,6 @@
 # any pycache :
 __pycache__/
 discord.log
+.cache
+tmp/
+*.mp4
