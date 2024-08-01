@@ -2,3 +2,4 @@
 # any pycache :
 __pycache__/
 discord.log
+.cache

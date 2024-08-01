@@ -1,0 +1,3 @@
+from .spotify_external_backend import SpotifyExternalBackend
+
+external_backend = SpotifyExternalBackend
