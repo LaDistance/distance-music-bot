@@ -3,17 +3,16 @@ from discord import VoiceClient, FFmpegPCMAudio
 from discord.ext.commands import Context
 from pytubefix import YouTube
 from pytubefix.exceptions import LoginRequired
-import os
 import asyncio
-from helpers.root import get_project_root
 import random
 class Playlist:
     def __init__(self, guild_id: str):
-        self.guild_id: str = None
+        self.guild_id: str = guild_id
         self.queue: List[str] = []
         self.voice_client : VoiceClient = None
         self.current_ctx : Context = None
         self.max_queue_size = 200
+        self.current_audio_file : str = None
 
     def add(self, url: str) -> None:
         if len(self.queue) >= self.max_queue_size:
@@ -73,15 +72,16 @@ class Playlist:
                 audio_file,
             )
             self.voice_client.play(source)
-
-            await self.current_ctx.send(f"Now playing: {yt.title}")
+            self.current_audio_file = audio_file
+            await self.current_ctx.send(f"Now playing: {yt.title}. There are {len(self.queue)} songs left in the playlist.")
 
             while self.voice_client.is_playing():
                 await asyncio.sleep(1)
-
-            os.remove(audio_file)
+            
+            self.delete_current_audio_file()
         except LoginRequired:
             await self.current_ctx.send("This video requires a login to play.")
+
         await self.play_next()
 
     async def handle_next(self) -> None:
@@ -92,9 +92,11 @@ class Playlist:
             await self.disconnect()
             self.queue.clear()
 
-    async def skip(self) -> None:
+    async def skip(self, amount: int) -> None:
         if self.voice_client is not None:
             self.voice_client.stop()
+            self.queue = self.queue[amount:]
+            self.delete_current_audio_file()
             await self.play_next()
         else:
             await self.current_ctx.send("Not currently playing anything.")
@@ -102,4 +104,10 @@ class Playlist:
     async def clear(self) -> None:
         self.queue.clear()
         self.voice_client.stop()
+        
         await self.current_ctx.send("Playlist cleared.")
+
+    def delete_current_audio_file(self) -> None:
+        if self.current_audio_file is not None:
+            self.delete_current_audio_file()
+            self.current_audio_file = None
