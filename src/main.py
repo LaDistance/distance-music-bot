@@ -42,11 +42,11 @@ async def play(ctx: Context, url: str):
 
     # Check whether we are dealing with Spotify or YouTube
     if "spotify" in url:
-        external_backend = SpotifyExternalBackend()
+        external_backend = SpotifyExternalBackend(ctx)
     elif (
         "youtu" in url
     ):  # Some YouTube URLs look like "youtu.be" so we need to check for "youtu" instead of "youtube"
-        external_backend = YoutubeExternalBackend()
+        external_backend = YoutubeExternalBackend(ctx)
     else:
         await ctx.send("The link you provided is not a valid YouTube or Spotify URL.")
         return
@@ -58,7 +58,7 @@ async def play(ctx: Context, url: str):
 
     # If it is part of a playlist, get the whole playlist.
     if external_backend.is_in_a_playlist(url):
-        tracks_urls = external_backend.get_playlist_youtube_urls(url)
+        tracks_urls = await external_backend.get_playlist_youtube_urls(url)
         playlist.add_playlist(tracks_urls)
         await ctx.send(f"Added {len(tracks_urls)} to the playlist.")
     else:

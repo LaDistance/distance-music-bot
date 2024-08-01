@@ -1,13 +1,15 @@
 from re import match
-from typing import List
 from external_backend.base import ExternalBackend
 from pytubefix import Playlist
-
-from src.helpers.root import get_project_root
-
+from discord.ext.commands import Context
+import asyncio
 
 class YoutubeExternalBackend(ExternalBackend):
-    def is_valid_url(url: str) -> bool:
+    def __init__(self, ctx: Context):
+        # We are passing the context so we can send messages on Discord to inform about the activity of this class
+        self.ctx = ctx
+
+    def is_valid_url(self, url: str) -> bool:
         """
         Validate a URL to ensure it is a valid YouTube URL.
 
@@ -26,7 +28,7 @@ class YoutubeExternalBackend(ExternalBackend):
             is not None
         )
 
-    def is_in_a_playlist(url: str) -> bool:
+    def is_in_a_playlist(self, url: str) -> bool:
         """
         Check if the video is in a playlist.
 
@@ -38,9 +40,12 @@ class YoutubeExternalBackend(ExternalBackend):
         """
         return "list" in url
 
-    def get_playlist_youtube_urls(url: str) -> List[str]:
-        yt_playlist = Playlist(url, use_oauth=True, allow_oauth_cache=True, token_file=f"{get_project_root()}/tmp/youtube_token.json")
-        return [video.watch_url for video in yt_playlist.videos]
+    async def get_playlist_youtube_urls(self, url: str):
+        def get_videos():
+            yt_playlist = Playlist(url, use_oauth=True, allow_oauth_cache=True)
+            return [video.watch_url for video in yt_playlist.videos]
+        
+        return await asyncio.to_thread(get_videos)
 
-    def get_track_youtube_url(self, url: str) -> str:
+    async def get_track_youtube_url(self, url: str) -> str:
         return url

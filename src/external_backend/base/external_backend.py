@@ -12,9 +12,9 @@ class ExternalBackend(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_playlist_youtube_urls(self, url: str) -> List[str]:
+    async def get_playlist_youtube_urls(self, url: str) -> List[str]:
         raise NotImplementedError
 
     @abstractmethod
-    def get_track_youtube_url(self, url: str) -> str:
+    async def get_track_youtube_url(self, url: str) -> str:
         raise NotImplementedError
