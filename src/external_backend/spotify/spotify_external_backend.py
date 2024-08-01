@@ -1,5 +1,6 @@
 import asyncio
 from re import match
+import re
 from typing import List
 from external_backend.base import ExternalBackend
 from pytubefix import Search
@@ -99,11 +100,16 @@ class SpotifyExternalBackend(ExternalBackend):
 
         return urls
 
-    
+    def _extract_spotify_id(self, url: str, content_type: str) -> str:
+        pattern = fr"{content_type}/([a-zA-Z0-9]+)"
+        match = re.search(pattern, url)
+        if match:
+            return match.group(1)
+        else:
+            raise ValueError("Invalid Spotify {content_type} URL")
 
     async def get_playlist_youtube_urls(self, url: str) -> List[str]:
-        playlist_id = url.split("/")[-1]
-
+        playlist_id = self._extract_spotify_id(url, "playlist")
         playlist_tracks = []
         page = 0
         while "We get results from the API":
@@ -121,7 +127,7 @@ class SpotifyExternalBackend(ExternalBackend):
         return await self._search_for_songs_in_playlist(playlist_track_names)
 
     async def get_track_youtube_url(self, url: str) -> str:
-        track_id = url.split("/")[-1]
+        track_id = self._extract_spotify_id(url, "track")
         track = self.spotify.track(track_id)
         track_name = f"{track['artists'][0]['name']} - {track['name']}"
 
