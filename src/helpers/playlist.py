@@ -11,7 +11,7 @@ class Playlist:
         self.queue: List[str] = []
         self.voice_client : VoiceClient = None
         self.current_ctx : Context = None
-        self.max_queue_size = 200
+        self.max_queue_size = 2000
         self.current_audio_file : str = None
 
     def add(self, url: str) -> None:
