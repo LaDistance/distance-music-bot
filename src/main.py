@@ -7,7 +7,6 @@ from external_backend.spotify import SpotifyExternalBackend
 from external_backend.youtube import YoutubeExternalBackend
 from helpers.playlist import Playlist
 from helpers.logger import logger
-from helpers.login import login_to_youtube
 
 intents = discord.Intents.default()
 intents.message_content = True  # Ensure message content intent is enabled
@@ -98,13 +97,13 @@ async def stop(ctx: Context):
     name="skip",
     help="Skip the currently playing audio and play the next song in the playlist",
 )
-async def skip(ctx: Context):
+async def skip(ctx: Context, amount: int = 1):
     playlist = playlists.get(ctx.guild.id)
     if playlist is None:
         await ctx.send("I'm not connected to a voice channel.")
         return
 
-    await playlist.skip()
+    await playlist.skip(amount)
 
 
 @bot.command(name="clear", help="Clear the playlist")
